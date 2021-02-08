@@ -713,7 +713,7 @@
   "kms": {
     "version": "0.46.0",
     "coreVersion": "0.46.0",
-    "protocolVersion": "2014-11-01",
+    "protocolVersion": "2021-02-08",
     "baseTypeName": "Kms"
   },
   "lakeformation": {

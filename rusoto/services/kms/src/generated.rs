@@ -62,15 +62,13 @@ pub struct AliasListEntry {
     #[serde(rename = "AliasName")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub alias_name: Option<String>,
-    /// <p>Date and time that the alias was most recently created in the account and Region. Formatted as Unix time.</p>
     #[serde(rename = "CreationDate")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub creation_date: Option<f64>,
-    /// <p>Date and time that the alias was most recently associated with a CMK in the account and Region. Formatted as Unix time.</p>
     #[serde(rename = "LastUpdatedDate")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_updated_date: Option<f64>,
-    /// <p>String that contains the key identifier of the CMK associated with the alias.</p>
+    /// <p>String that contains the key identifier referred to by the alias.</p>
     #[serde(rename = "TargetKeyId")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_key_id: Option<String>,
@@ -175,7 +173,7 @@ pub struct CreateGrantRequest {
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 #[cfg_attr(any(test, feature = "serialize_structs"), derive(Serialize))]
 pub struct CreateGrantResponse {
-    /// <p>The unique identifier for the grant.</p> <p>You can use the <code>GrantId</code> in a subsequent <a>RetireGrant</a> or <a>RevokeGrant</a> operation.</p>
+    /// <p>The unique identifier for the grant.</p> <p>You can use the <code>GrantId</code> in a <a>ListGrants</a>, <a>RetireGrant</a>, or <a>RevokeGrant</a> operation.</p>
     #[serde(rename = "GrantId")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grant_id: Option<String>,
@@ -292,11 +290,24 @@ pub struct DecryptRequest {
     #[serde(rename = "KeyId")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key_id: Option<String>,
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "Recipient")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<Recipient>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 #[cfg_attr(any(test, feature = "serialize_structs"), derive(Serialize))]
 pub struct DecryptResponse {
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "CiphertextForRecipient")]
+    #[serde(
+        deserialize_with = "::rusoto_core::serialization::SerdeBlob::deserialize_blob",
+        serialize_with = "::rusoto_core::serialization::SerdeBlob::serialize_blob",
+        default
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ciphertext_for_recipient: Option<bytes::Bytes>,
     /// <p>The encryption algorithm that was used to decrypt the ciphertext.</p>
     #[serde(rename = "EncryptionAlgorithm")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -628,6 +639,10 @@ pub struct GenerateDataKeyRequest {
     #[serde(rename = "NumberOfBytes")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub number_of_bytes: Option<i64>,
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "Recipient")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<Recipient>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
@@ -642,6 +657,15 @@ pub struct GenerateDataKeyResponse {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ciphertext_blob: Option<bytes::Bytes>,
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "CiphertextForRecipient")]
+    #[serde(
+        deserialize_with = "::rusoto_core::serialization::SerdeBlob::deserialize_blob",
+        serialize_with = "::rusoto_core::serialization::SerdeBlob::serialize_blob",
+        default
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ciphertext_for_recipient: Option<bytes::Bytes>,
     /// <p>The Amazon Resource Name (<a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id-key-ARN">key ARN</a>) of the CMK that encrypted the data key.</p>
     #[serde(rename = "KeyId")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -710,11 +734,24 @@ pub struct GenerateRandomRequest {
     #[serde(rename = "NumberOfBytes")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub number_of_bytes: Option<i64>,
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "Recipient")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<Recipient>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 #[cfg_attr(any(test, feature = "serialize_structs"), derive(Serialize))]
 pub struct GenerateRandomResponse {
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "CiphertextForRecipient")]
+    #[serde(
+        deserialize_with = "::rusoto_core::serialization::SerdeBlob::deserialize_blob",
+        serialize_with = "::rusoto_core::serialization::SerdeBlob::serialize_blob",
+        default
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ciphertext_for_recipient: Option<bytes::Bytes>,
     /// <p>The random byte string. When you use the HTTP API or the AWS CLI, the value is Base64-encoded. Otherwise, it is not Base64-encoded.</p>
     #[serde(rename = "Plaintext")]
     #[serde(
@@ -1073,7 +1110,15 @@ pub struct ListAliasesResponse {
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 #[cfg_attr(feature = "deserialize_structs", derive(Deserialize))]
 pub struct ListGrantsRequest {
-    /// <p>A unique identifier for the customer master key (CMK).</p> <p>Specify the key ID or the Amazon Resource Name (ARN) of the CMK. To specify a CMK in a different AWS account, you must use the key ARN.</p> <p>For example:</p> <ul> <li> <p>Key ID: <code>1234abcd-12ab-34cd-56ef-1234567890ab</code> </p> </li> <li> <p>Key ARN: <code>arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab</code> </p> </li> </ul> <p>To get the key ID and key ARN for a CMK, use <a>ListKeys</a> or <a>DescribeKey</a>.</p>
+    /// <p>Returns only the grant with the specified grant ID. The grant ID uniquely identifies the grant. </p>
+    #[serde(rename = "GrantId")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub grant_id: Option<String>,
+    /// <p>Returns only grants where the specified principal is the grantee principal for the grant.</p>
+    #[serde(rename = "GranteePrincipal")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub grantee_principal: Option<String>,
+    /// <p>Returns only grants for the specified customer master key (CMK). This parameter is required.</p> <p>Specify the key ID or the Amazon Resource Name (ARN) of the CMK. To specify a CMK in a different AWS account, you must use the key ARN.</p> <p>For example:</p> <ul> <li> <p>Key ID: <code>1234abcd-12ab-34cd-56ef-1234567890ab</code> </p> </li> <li> <p>Key ARN: <code>arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab</code> </p> </li> </ul> <p>To get the key ID and key ARN for a CMK, use <a>ListKeys</a> or <a>DescribeKey</a>.</p>
     #[serde(rename = "KeyId")]
     pub key_id: String,
     /// <p>Use this parameter to specify the maximum number of items to return. When this value is present, AWS KMS does not return more than the specified number of items, but it might return fewer.</p> <p>This value is optional. If you include a value, it must be between 1 and 100, inclusive. If you do not include a value, it defaults to 50.</p>
@@ -1301,6 +1346,30 @@ pub struct ReEncryptResponse {
     #[serde(rename = "SourceKeyId")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source_key_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
+#[cfg_attr(feature = "deserialize_structs", derive(Deserialize))]
+pub struct Recipient {
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "AttestationDocument")]
+    #[serde(
+        deserialize_with = "::rusoto_core::serialization::SerdeBlob::deserialize_blob",
+        serialize_with = "::rusoto_core::serialization::SerdeBlob::serialize_blob",
+        default
+    )]
+    pub attestation_document: bytes::Bytes,
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "KeyEncryptionAlgorithm")]
+    pub key_encryption_algorithm: String,
+    /// <p><i>Currently undocumented.</i></p>
+    #[serde(rename = "PublicKey")]
+    #[serde(
+        deserialize_with = "::rusoto_core::serialization::SerdeBlob::deserialize_blob",
+        serialize_with = "::rusoto_core::serialization::SerdeBlob::serialize_blob",
+        default
+    )]
+    pub public_key: bytes::Bytes,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
@@ -3533,6 +3602,8 @@ pub enum ListGrantsError {
     DependencyTimeout(String),
     /// <p>The request was rejected because a specified ARN, or an ARN in a key policy, is not valid.</p>
     InvalidArn(String),
+    /// <p>The request was rejected because the specified <code>GrantId</code> is not valid.</p>
+    InvalidGrantId(String),
     /// <p>The request was rejected because the marker that specifies where pagination should next begin is not valid.</p>
     InvalidMarker(String),
     /// <p>The request was rejected because an internal exception occurred. The request can be retried.</p>
@@ -3552,6 +3623,9 @@ impl ListGrantsError {
                 }
                 "InvalidArnException" => {
                     return RusotoError::Service(ListGrantsError::InvalidArn(err.msg))
+                }
+                "InvalidGrantIdException" => {
+                    return RusotoError::Service(ListGrantsError::InvalidGrantId(err.msg))
                 }
                 "InvalidMarkerException" => {
                     return RusotoError::Service(ListGrantsError::InvalidMarker(err.msg))
@@ -3578,6 +3652,7 @@ impl fmt::Display for ListGrantsError {
         match *self {
             ListGrantsError::DependencyTimeout(ref cause) => write!(f, "{}", cause),
             ListGrantsError::InvalidArn(ref cause) => write!(f, "{}", cause),
+            ListGrantsError::InvalidGrantId(ref cause) => write!(f, "{}", cause),
             ListGrantsError::InvalidMarker(ref cause) => write!(f, "{}", cause),
             ListGrantsError::KMSInternal(ref cause) => write!(f, "{}", cause),
             ListGrantsError::KMSInvalidState(ref cause) => write!(f, "{}", cause),
@@ -4764,7 +4839,7 @@ pub trait Kms {
         input: ListAliasesRequest,
     ) -> Result<ListAliasesResponse, RusotoError<ListAliasesError>>;
 
-    /// <p><p>Gets a list of all grants for the specified customer master key (CMK).</p> <note> <p>The <code>GranteePrincipal</code> field in the <code>ListGrants</code> response usually contains the user or role designated as the grantee principal in the grant. However, when the grantee principal in the grant is an AWS service, the <code>GranteePrincipal</code> field contains the <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-services">service principal</a>, which might represent several different grantee principals.</p> </note> <p> <b>Cross-account use</b>: Yes. To perform this operation on a CMK in a different AWS account, specify the key ARN in the value of the <code>KeyId</code> parameter.</p> <p> <b>Required permissions</b>: <a href="https://docs.aws.amazon.com/kms/latest/developerguide/kms-api-permissions-reference.html">kms:ListGrants</a> (key policy)</p> <p> <b>Related operations:</b> </p> <ul> <li> <p> <a>CreateGrant</a> </p> </li> <li> <p> <a>ListRetirableGrants</a> </p> </li> <li> <p> <a>RetireGrant</a> </p> </li> <li> <p> <a>RevokeGrant</a> </p> </li> </ul></p>
+    /// <p><p>Gets a list of all grants for the specified customer master key (CMK). </p> <p>You must specify the CMK in all requests. You can filter the grant list by grant ID or grantee principal.</p> <note> <p>The <code>GranteePrincipal</code> field in the <code>ListGrants</code> response usually contains the user or role designated as the grantee principal in the grant. However, when the grantee principal in the grant is an AWS service, the <code>GranteePrincipal</code> field contains the <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-services">service principal</a>, which might represent several different grantee principals.</p> </note> <p> <b>Cross-account use</b>: Yes. To perform this operation on a CMK in a different AWS account, specify the key ARN in the value of the <code>KeyId</code> parameter.</p> <p> <b>Required permissions</b>: <a href="https://docs.aws.amazon.com/kms/latest/developerguide/kms-api-permissions-reference.html">kms:ListGrants</a> (key policy)</p> <p> <b>Related operations:</b> </p> <ul> <li> <p> <a>CreateGrant</a> </p> </li> <li> <p> <a>ListRetirableGrants</a> </p> </li> <li> <p> <a>RetireGrant</a> </p> </li> <li> <p> <a>RevokeGrant</a> </p> </li> </ul></p>
     async fn list_grants(
         &self,
         input: ListGrantsRequest,
@@ -5439,7 +5514,7 @@ impl Kms for KmsClient {
         proto::json::ResponsePayload::new(&response).deserialize::<ListAliasesResponse, _>()
     }
 
-    /// <p><p>Gets a list of all grants for the specified customer master key (CMK).</p> <note> <p>The <code>GranteePrincipal</code> field in the <code>ListGrants</code> response usually contains the user or role designated as the grantee principal in the grant. However, when the grantee principal in the grant is an AWS service, the <code>GranteePrincipal</code> field contains the <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-services">service principal</a>, which might represent several different grantee principals.</p> </note> <p> <b>Cross-account use</b>: Yes. To perform this operation on a CMK in a different AWS account, specify the key ARN in the value of the <code>KeyId</code> parameter.</p> <p> <b>Required permissions</b>: <a href="https://docs.aws.amazon.com/kms/latest/developerguide/kms-api-permissions-reference.html">kms:ListGrants</a> (key policy)</p> <p> <b>Related operations:</b> </p> <ul> <li> <p> <a>CreateGrant</a> </p> </li> <li> <p> <a>ListRetirableGrants</a> </p> </li> <li> <p> <a>RetireGrant</a> </p> </li> <li> <p> <a>RevokeGrant</a> </p> </li> </ul></p>
+    /// <p><p>Gets a list of all grants for the specified customer master key (CMK). </p> <p>You must specify the CMK in all requests. You can filter the grant list by grant ID or grantee principal.</p> <note> <p>The <code>GranteePrincipal</code> field in the <code>ListGrants</code> response usually contains the user or role designated as the grantee principal in the grant. However, when the grantee principal in the grant is an AWS service, the <code>GranteePrincipal</code> field contains the <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-services">service principal</a>, which might represent several different grantee principals.</p> </note> <p> <b>Cross-account use</b>: Yes. To perform this operation on a CMK in a different AWS account, specify the key ARN in the value of the <code>KeyId</code> parameter.</p> <p> <b>Required permissions</b>: <a href="https://docs.aws.amazon.com/kms/latest/developerguide/kms-api-permissions-reference.html">kms:ListGrants</a> (key policy)</p> <p> <b>Related operations:</b> </p> <ul> <li> <p> <a>CreateGrant</a> </p> </li> <li> <p> <a>ListRetirableGrants</a> </p> </li> <li> <p> <a>RetireGrant</a> </p> </li> <li> <p> <a>RevokeGrant</a> </p> </li> </ul></p>
     async fn list_grants(
         &self,
         input: ListGrantsRequest,
